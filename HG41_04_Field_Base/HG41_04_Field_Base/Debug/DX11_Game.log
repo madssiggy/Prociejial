@@ -1,0 +1,4 @@
+﻿C:\Users\user\source\repos\HG41_04_Field_Base\HG41_04_Field_Base\shaderNoise.hlsl(15,21-24): warning X3081: comma expression used where a vector constructor may have been intended
+  
+  compilation object save succeeded; see C:\Users\user\source\repos\HG41_04_Field_Base\HG41_04_Field_Base\shaderWaterPS.cso
+  DX11_Game.vcxproj -> C:\Users\user\source\repos\HG41_04_Field_Base\HG41_04_Field_Base\Debug\DX11_Game.exe
