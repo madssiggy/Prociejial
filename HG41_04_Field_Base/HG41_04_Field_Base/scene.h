@@ -77,6 +77,13 @@ public:
 		return gameObject;
 	}
 
-
-
+	template <typename T>
+	T* GetGameObject() {
+		for (CGameObject* object : m_GameObject) {
+			if (typeid(*object) == typeid(T)) {
+				return (T*)object;
+			}
+		}
+		return NULL;
+	}
 };

@@ -29,5 +29,11 @@ public:
 
 	float GetLightRotation() { return m_LightRotation; }
 
-
+LIGHT GetLight(){
+	LIGHT light;
+	light.Direction = XMFLOAT4(0.0f, -cosf(m_LightRotation), sinf(m_LightRotation), 0.0f);
+	light.Diffuse = COLOR(0.9f, 0.9f, 0.9f, 1.0f);
+	light.Ambient = COLOR(0.1f, 0.1f, 0.1f, 1.0f);
+	return light;
+}
 };

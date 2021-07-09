@@ -1,5 +1,6 @@
 
 #include "main.h"
+#include "manager.h"
 #include "renderer.h"
 #include "game_object.h"
 #include "field.h"
@@ -9,7 +10,12 @@
 
 #include "input.h"
 
+#include "sky.h"
 
+
+CField::CField() {
+	
+}
 
 void CField::Init()
 {
@@ -45,6 +51,8 @@ void CField::Init()
 		sd.pSysMem = m_Vertex;
 
 		CRenderer::GetDevice()->CreateBuffer(&bd, &sd, &m_VertexBuffer);
+
+		
 	}
 
 
@@ -101,6 +109,7 @@ void CField::Init()
 	m_Shader = new CShader();
 	m_Shader->Init("shaderFieldVS.cso", "shaderFieldPS.cso");
 
+	m_LightRotation = 0.0f;
 }
 
 
@@ -118,7 +127,11 @@ void CField::Uninit()
 
 void CField::Update()
 {
-
+	//m_LightRotation += 0.01f;
+	if (CInput::GetKeyPress('W'))
+		m_LightRotation += 0.01f;
+	if (CInput::GetKeyPress('S'))
+		m_LightRotation -= 0.01f;
 }
 
 
@@ -153,6 +166,12 @@ void CField::Draw()
 	m_Shader->SetViewMatrix(&camera->GetViewMatrix());
 	m_Shader->SetProjectionMatrix(&camera->GetProjectionMatrix());
 	m_Shader->SetCameraPosition(&camera->GetPosition());
+
+	LIGHT light;
+	light.Direction = XMFLOAT4(0.0f, -cosf(m_LightRotation), sinf(m_LightRotation), 0.0f);
+	light.Diffuse = COLOR(0.9f, 0.9f, 0.9f, 1.0f);
+	light.Ambient = COLOR(0.1f, 0.1f, 0.1f, 1.0f);
+	m_Shader->SetLight(light);
 
 	m_Shader->Set();
 

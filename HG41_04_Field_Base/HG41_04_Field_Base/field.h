@@ -21,8 +21,10 @@ private:
 
 
 	CShader*		m_Shader;
-
+protected:
+	float m_LightRotation;
 public:
+	CField();
 	void Init();
 	void Uninit();
 	void Update();

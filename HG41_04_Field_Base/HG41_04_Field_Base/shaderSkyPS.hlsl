@@ -17,7 +17,16 @@ cbuffer ConstatntBuffer : register(b0)
 
 }
 
+//ライトバッファ
+struct LIGHT {
+	float4 Direction;
+	float4 Diffuse;
+	float4 Ambient;
+};
 
+cbuffer LightBuffer:register(b1) {
+	LIGHT Light;
+}
 
 //=============================================================================
 // ピクセルシェーダ
@@ -43,6 +52,40 @@ void main( in  float4 inPosition		: SV_POSITION,
 	outDiffuse.a= fbm2(inTexCoord+offset, 16,Parameter*0.1)*0.5 + 0.5;
 	outDiffuse.a = gain(0.9, outDiffuse.a);
 	//outDiffuse.a = 1.0 - fbm3(inWorldPosition.xyz, 10)*0.5;
-    
-    
+
+	float3 diffuse = 0.0;
+	outDiffuse.rgb = diffuse;
+	outDiffuse.a = 1.0;
+
+	
+//散乱現象------------------------------------
+	float3 eye = inWorldPosition - CameraPosition;
+	eye = normalize(eye);
+
+	//大気距離。光が大気に侵入する長さとなってくる
+	float dist = distance(inWorldPosition*0.8, CameraPosition);
+
+	//ミー散乱
+
+	float m;
+	m = saturate(-dot(Light.Direction.xyz, eye));
+	m = pow(m, 50);
+
+	diffuse += m * 0.08;//太陽の輪郭
+
+
+	//レイリー散乱
+	float3 vy = float3(0.0, 1.0, 0.0);
+	float atm = saturate(1.0 - dot(-Light.Direction.xyz, vy));//;//ライト方向の大気。太陽の方が大気薄いってことになっている.
+
+	float3 rcolor = 1.0 - float3(0.5, 0.8, 1.0)*atm*1.0;//レイリー散乱減衰。
+
+	float ld = 0.5 - dot(Light.Direction.xyz, eye)*0.5;//レイリー散乱.散乱しやすい色の数値をあげている
+	diffuse += rcolor * dist*ld*float3(0.6, 0.8, 1.0)*0.008;
+
+
+	outDiffuse.rgb = diffuse;
+
+	outDiffuse.a = 1.0;
+
 }

@@ -16,7 +16,15 @@ cbuffer ConstatntBuffer : register(b0)
     float4 CameraPosition;
 }
 
+struct LIGHT {
+	float4 Direction;
+	float4 Diffuse;
+	float4 Ambient;
+};
 
+cbuffer LightBuffer:register(b1) {
+	LIGHT Light;
+}
 
 //=============================================================================
 // ピクセルシェーダ
@@ -31,12 +39,12 @@ void main( in  float4 inPosition		: SV_POSITION,
 {
     
 //	outDiffuse = g_Texture.Sample(g_SamplerState, inTexCoord);
-	
+//地形の高さごとに描画されるテクスチャを変更する	
 	float soil = fbm2(inTexCoord*0.1, 16);
 
-	if (soil < 0.15)
+	if (soil < 0.15)//一定の高さ以下ならあらかじめ用意されていたテクスチャ
 		outDiffuse = g_Texture.Sample(g_SamplerState, inTexCoord);
-	else {
+	else {//一定以上であればプロシージャルテクスチャを張り付ける
 		outDiffuse.rgb = (fbm2(inTexCoord*0.1, 16)*0.5+0.5)*float3(0.7, 0.9, 0.4)*random2(inTexCoord)*2.0;
 		outDiffuse.a = 1.0;
 	}
@@ -67,22 +75,22 @@ void main( in  float4 inPosition		: SV_POSITION,
 	float3 normal = float3(-dx, 0.001,-dz);
 	normal = normalize(normal);
 
-	float3 lightDir = float3(1.0, 1.0, 1.0);
+	float3 lightDir = Light.Direction.xyz;
 	lightDir = normalize(lightDir);
 
 	float light = saturate(0.5 - dot(normal,lightDir)*0.5);
 	outDiffuse.rgb *= light;
 
 
-	float MaxHeight = 10.0;
+	/*float MaxHeight = 10.0;
 	float MinHeight = 0.0;
 	float alpha = clamp((inWorldPosition.y - MinHeight) / (MaxHeight - MinHeight), 0.0, 1.0);
-	outDiffuse.rgb = outDiffuse.rgb*alpha*float3(0.3, 0.3, 0.3)*(1.0 - alpha);
-
+	outDiffuse.rgb = outDiffuse.rgb*alpha*float3(0.3, 0.3, 0.3)*(1.0 - alpha);水中を暗く描画するため。一定の高さ以下であれば暗く描画。
+*/
 	float fog = distance(CameraPosition.xyz, inWorldPosition.xyz)*0.03;
-	fog = saturate(fog);
+	fog = saturate(fog);//大気散乱を起こす
 
-	outDiffuse.rgb = outDiffuse.rgb*(1.0 - fog)+float3(0.52, 0.63, 1.0)*fog;
+	outDiffuse.rgb = outDiffuse.rgb*(1.0 - fog)+float3(0.6, 0.8, 1.0)*fog* light*0.1;
 
 
 }
